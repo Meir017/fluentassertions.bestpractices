@@ -789,7 +789,7 @@ namespace FluentAssertions.Analyzers.Tests.Tips
                 .WithAllAnalyzers()
                 .WithSources(source)
                 .WithPackageReferences(PackageReference.FluentAssertions_6_12_0, PackageReference.XunitAssert_2_5_1)
-                .WithExpectedDiagnostics(new DiagnosticResult
+                .WithExpectedDiagnostics(new LegacyDiagnosticResult
                 {
                     Id = AssertAnalyzer.XunitRule.Id,
                     Message = AssertAnalyzer.Message,

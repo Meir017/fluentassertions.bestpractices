@@ -1954,7 +1954,7 @@ public class NunitTests
             .WithAllAnalyzers()
             .WithSources(source)
             .WithPackageReferences(PackageReference.FluentAssertions_6_12_0, nunit)
-            .WithExpectedDiagnostics(new DiagnosticResult
+            .WithExpectedDiagnostics(new LegacyDiagnosticResult
             {
                 Id = AssertAnalyzer.NUnitRule.Id,
                 Message = AssertAnalyzer.Message,

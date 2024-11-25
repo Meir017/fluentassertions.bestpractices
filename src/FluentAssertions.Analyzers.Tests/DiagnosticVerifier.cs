@@ -12,6 +12,9 @@ using Microsoft.CodeAnalysis.CodeFixes;
 using System.Threading;
 using Microsoft.CodeAnalysis.Simplification;
 using Microsoft.CodeAnalysis.Formatting;
+using Microsoft.CodeAnalysis.CSharp.Testing;
+using Microsoft.CodeAnalysis.Testing;
+using System.Threading.Tasks;
 
 namespace FluentAssertions.Analyzers.Tests
 {
@@ -20,6 +23,13 @@ namespace FluentAssertions.Analyzers.Tests
     /// </summary>
     public static class DiagnosticVerifier
     {
+        private class CodeFixVerifier<TCodeFix, TAnalyzer> : CSharpCodeFixVerifier<TAnalyzer, TCodeFix, DefaultVerifier>
+            where TAnalyzer : DiagnosticAnalyzer, new()
+            where TCodeFix : CodeFixProvider, new()
+        {
+
+        }
+
         #region CodeFixVerifier
 
         public static void VerifyCSharpFix<TCodeFixProvider, TDiagnosticAnalyzer>(string oldSource, string newSource)
@@ -37,6 +47,28 @@ namespace FluentAssertions.Analyzers.Tests
 
         public static void VerifyFix(CodeFixVerifierArguments arguments)
             => VerifyFix(arguments, arguments.DiagnosticAnalyzers.Single(), arguments.CodeFixProviders.Single(), arguments.FixedSources.Single());
+
+        public static async Task VerifyFixAsync<TCodeFix, TAnalyzer>(CodeFixVerifierNewArguments<TCodeFix, TAnalyzer> arguments)
+            where TAnalyzer : DiagnosticAnalyzer, new()
+            where TCodeFix : CodeFixProvider, new()
+        {
+            var test = new CSharpCodeFixTest<TAnalyzer, TCodeFix, DefaultVerifier>
+            {
+                ReferenceAssemblies = ReferenceAssemblies.Net.Net80.AddPackages(arguments.PackageReferences.ToImmutableArray()),
+                ExpectedDiagnostics = { arguments.ExpectedDiagnostic },
+            };
+            foreach (var source in arguments.Sources)
+            {
+                test.TestState.Sources.Add(source);
+            }
+            foreach (var fixedSource in arguments.FixedSources)
+            {
+                test.FixedState.Sources.Add(fixedSource);
+            }
+
+            // TODO: add support for diagnostics (merge test code-fixers with test analyzers).
+            await test.RunAsync();
+        }
 
         public static void VerifyNoFix(CodeFixVerifierArguments arguments)
             => VerifyNoFix(arguments, arguments.DiagnosticAnalyzers.Single(), arguments.CodeFixProviders.Single());
@@ -274,20 +306,6 @@ namespace FluentAssertions.Analyzers.Tests
 
         #region Verifier wrappers
 
-        /// <summary>
-        /// Called to test a C# DiagnosticAnalyzer when applied on the single inputted string as a source
-        /// Note: input a DiagnosticResult for each Diagnostic expected
-        /// </summary>
-        /// <param name="source">A class in the form of a string to run the analyzer on</param>
-        /// <param name="expected"> DiagnosticResults that should appear after the analyzer is run on the source</param>
-        public static void VerifyCSharpDiagnostic<TDiagnosticAnalyzer>(string source, params DiagnosticResult[] expected) where TDiagnosticAnalyzer : DiagnosticAnalyzer, new()
-        {
-            VerifyDiagnostic(new DiagnosticVerifierArguments()
-                .WithDiagnosticAnalyzer<TDiagnosticAnalyzer>()
-                .WithSources(source)
-                .WithExpectedDiagnostics(expected));
-        }
-
         public static void VerifyDiagnostic(DiagnosticVerifierArguments arguments)
         {
             var project = CsProjectGenerator.CreateProject(arguments);
@@ -297,7 +315,7 @@ namespace FluentAssertions.Analyzers.Tests
             VerifyDiagnosticResults(diagnostics, arguments.DiagnosticAnalyzers.ToArray(), arguments.ExpectedDiagnostics.ToArray());
         }
 
-        public static void VerifyCSharpDiagnosticUsingAllAnalyzers(string source, params DiagnosticResult[] expected)
+        public static void VerifyCSharpDiagnosticUsingAllAnalyzers(string source, params LegacyDiagnosticResult[] expected)
         {
             VerifyDiagnostic(new DiagnosticVerifierArguments()
                 .WithAllAnalyzers()
@@ -310,7 +328,7 @@ namespace FluentAssertions.Analyzers.Tests
 
         #region Actual comparisons and verifications
 
-        private static void VerifyDiagnosticResults(IEnumerable<Diagnostic> actualResults, DiagnosticAnalyzer[] analyzers, params DiagnosticResult[] expectedResults)
+        private static void VerifyDiagnosticResults(IEnumerable<Diagnostic> actualResults, DiagnosticAnalyzer[] analyzers, params LegacyDiagnosticResult[] expectedResults)
         {
             int expectedCount = expectedResults.Length;
             int actualCount = actualResults.Count();

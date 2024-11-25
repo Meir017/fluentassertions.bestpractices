@@ -22,7 +22,7 @@ namespace FluentAssertions.Analyzers.Tests.Tips
                 .WithDiagnosticAnalyzer<FluentAssertionsAnalyzer>()
                 .WithSources(Code(assertion))
                 .WithPackageReferences(PackageReference.FluentAssertions_6_12_0)
-                .WithExpectedDiagnostics(new DiagnosticResult
+                .WithExpectedDiagnostics(new LegacyDiagnosticResult
                 {
                     Id = FluentAssertionsAnalyzer.DiagnosticId,
                     Message = DiagnosticMetadata.NullConditionalMayNotExecute.Message,

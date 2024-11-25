@@ -188,7 +188,7 @@ namespace TestNamespace
         {
             var source = GenerateCode.GenericIDictionaryAssertion(sourceAssersion);
 
-            DiagnosticVerifier.VerifyCSharpDiagnosticUsingAllAnalyzers(source, new DiagnosticResult
+            DiagnosticVerifier.VerifyCSharpDiagnosticUsingAllAnalyzers(source, new LegacyDiagnosticResult
             {
                 Id = FluentAssertionsAnalyzer.DiagnosticId,
                 Message = metadata.Message,

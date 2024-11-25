@@ -103,7 +103,7 @@ namespace FluentAssertions.Analyzers.Tests.Tips
         private void VerifyCSharpDiagnosticExpressionBody(string sourceAssertion, int line, int column, DiagnosticMetadata metadata)
         {
             var source = GenerateCode.ObjectStatement(sourceAssertion);
-            DiagnosticVerifier.VerifyCSharpDiagnosticUsingAllAnalyzers(source, new DiagnosticResult
+            DiagnosticVerifier.VerifyCSharpDiagnosticUsingAllAnalyzers(source, new LegacyDiagnosticResult
             {
                 Id = FluentAssertionsAnalyzer.DiagnosticId,
                 Message = metadata.Message,

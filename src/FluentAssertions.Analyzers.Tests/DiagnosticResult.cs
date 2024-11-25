@@ -33,7 +33,7 @@ namespace FluentAssertions.Analyzers.Tests
     /// <summary>
     /// Struct that stores information about a Diagnostic appearing in a source
     /// </summary>
-    public struct DiagnosticResult
+    public struct LegacyDiagnosticResult
     {
         private DiagnosticResultLocation[] locations;
 

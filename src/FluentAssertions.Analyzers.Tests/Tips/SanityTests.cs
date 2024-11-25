@@ -313,7 +313,7 @@ public class TestClass
                 .WithSources(source, globalUsings)
                 .WithAllAnalyzers()
                 .WithPackageReferences(PackageReference.XunitAssert_2_5_1, PackageReference.FluentAssertions_6_12_0)
-                .WithExpectedDiagnostics(new DiagnosticResult()
+                .WithExpectedDiagnostics(new LegacyDiagnosticResult()
                 {
                     Id = AssertAnalyzer.XunitRule.Id,
                     Message = AssertAnalyzer.Message,
@@ -360,7 +360,7 @@ public class TestType3
                 .WithSources(source)
                 .WithAllAnalyzers()
                 .WithPackageReferences(PackageReference.FluentAssertions_6_12_0)
-                .WithExpectedDiagnostics(new DiagnosticResult()
+                .WithExpectedDiagnostics(new LegacyDiagnosticResult()
                 {
                     Id = FluentAssertionsAnalyzer.DiagnosticId,
                     Message = DiagnosticMetadata.CollectionShouldNotBeEmpty_AnyShouldBeTrue.Message,
@@ -439,7 +439,7 @@ public class MyCollectionType { }";
                 .WithSources(source)
                 .WithAllAnalyzers()
                 .WithPackageReferences(PackageReference.FluentAssertions_6_12_0)
-                .WithExpectedDiagnostics(new DiagnosticResult()
+                .WithExpectedDiagnostics(new LegacyDiagnosticResult()
                 {
                     Id = FluentAssertionsAnalyzer.DiagnosticId,
                     Message = DiagnosticMetadata.NullConditionalMayNotExecute.Message,

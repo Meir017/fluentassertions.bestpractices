@@ -120,7 +120,7 @@ namespace FluentAssertions.Analyzers.Tests
                 .WithSources(source)
                 .WithAllAnalyzers()
                 .WithPackageReferences(PackageReference.FluentAssertions_6_12_0)
-                .WithExpectedDiagnostics(new DiagnosticResult
+                .WithExpectedDiagnostics(new LegacyDiagnosticResult
                 {
                     Id = FluentAssertionsAnalyzer.DiagnosticId,
                     Message = metadata.Message,

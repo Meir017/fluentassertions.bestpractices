@@ -1,6 +1,9 @@
 using System.Text;
+using System.Threading.Tasks;
 using FluentAssertions.Analyzers.TestUtils;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.Testing;
+using Microsoft.CodeAnalysis.Text;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace FluentAssertions.Analyzers.Tests
@@ -8,13 +11,16 @@ namespace FluentAssertions.Analyzers.Tests
     [TestClass]
     public class CollectionTests
     {
-        [DataTestMethod]
-        [AssertionDiagnostic("actual.Any().Should().BeTrue({0});")]
-        [AssertionDiagnostic("actual.AsEnumerable().Any().Should().BeTrue({0}).And.ToString();")]
-        [AssertionDiagnostic("actual.ToList().Any().Should().BeTrue({0}).And.ToString();")]
-        [AssertionDiagnostic("actual.ToArray().Any().Should().BeTrue({0}).And.ToString();")]
-        [Implemented]
-        public void ExpressionBodyAssertion_TestAnalyzer(string assertion) => VerifyCSharpDiagnosticExpressionBody(assertion, DiagnosticMetadata.CollectionShouldNotBeEmpty_AnyShouldBeTrue);
+        private static CodeFixVerifierNewArguments<FluentAssertionsCodeFixProvider, FluentAssertionsAnalyzer> CreateCodeFixArguments(string source, string expected, DiagnosticMetadata metadata, LinePosition location)
+            => new CodeFixVerifierNewArguments<FluentAssertionsCodeFixProvider, FluentAssertionsAnalyzer>(new DiagnosticResult(FluentAssertionsAnalyzer.DiagnosticId, DiagnosticSeverity.Info)
+                .WithMessage(metadata.Message)
+                .WithLocation(location)
+                )
+            {
+                Sources = { source },
+                FixedSources = { expected },
+                
+            }.WithPackages(PackageReference.FluentAssertions_6_12_0);
 
         [DataTestMethod]
         [AssertionCodeFix(
@@ -30,7 +36,15 @@ namespace FluentAssertions.Analyzers.Tests
             oldAssertion: "actual.ToArray().Any().Should().BeTrue({0}).And.ToString();",
             newAssertion: "actual.ToArray().Should().NotBeEmpty({0}).And.ToString();")]
         [Implemented]
-        public void ExpressionBodyAssertion_TestCodeFix(string oldAssertion, string newAssertion) => VerifyCSharpFixExpressionBody(oldAssertion, newAssertion);
+        public async Task ExpressionBodyAssertion_TestCodeFix(string oldAssertion, string newAssertion)
+        {
+            var oldSource = GenerateCode.GenericIListExpressionBodyAssertion(oldAssertion);
+            var newSource = GenerateCode.GenericIListExpressionBodyAssertion(newAssertion);
+
+            var arguments = CreateCodeFixArguments(oldSource, newSource, DiagnosticMetadata.CollectionShouldNotBeEmpty_AnyShouldBeTrue, new LinePosition(9, 15));
+
+            await DiagnosticVerifier.VerifyFixAsync(arguments);
+        }
 
         [DataTestMethod]
         [AssertionDiagnostic("actual.Any().Should().BeTrue({0});")]
@@ -706,7 +720,7 @@ namespace FluentAssertions.Analyzers.Tests
         {
             var source = GenerateCode.GenericIEnumerableAssertion(assertion);
 
-            DiagnosticVerifier.VerifyCSharpDiagnosticUsingAllAnalyzers(source, new DiagnosticResult
+            DiagnosticVerifier.VerifyCSharpDiagnosticUsingAllAnalyzers(source, new LegacyDiagnosticResult
             {
                 Id = FluentAssertionsAnalyzer.DiagnosticId,
                 Message = DiagnosticMetadata.CollectionShouldContainSingle_ShouldHaveCount1.Message,
@@ -1108,7 +1122,7 @@ namespace FluentAssertions.Analyzers.Tests
         {
             var source = GenerateCode.GenericIListCodeBlockAssertion(sourceAssertion);
 
-            DiagnosticVerifier.VerifyCSharpDiagnosticUsingAllAnalyzers(source, new DiagnosticResult
+            DiagnosticVerifier.VerifyCSharpDiagnosticUsingAllAnalyzers(source, new LegacyDiagnosticResult
             {
                 Id = FluentAssertionsAnalyzer.DiagnosticId,
                 Message = metadata.Message,
@@ -1125,7 +1139,7 @@ namespace FluentAssertions.Analyzers.Tests
         {
             var source = GenerateCode.GenericIListExpressionBodyAssertion(sourceAssertion);
 
-            DiagnosticVerifier.VerifyCSharpDiagnosticUsingAllAnalyzers(source, new DiagnosticResult
+            DiagnosticVerifier.VerifyCSharpDiagnosticUsingAllAnalyzers(source, new LegacyDiagnosticResult
             {
                 Id = FluentAssertionsAnalyzer.DiagnosticId,
                 VisitorName = metadata.Name,
@@ -1142,7 +1156,7 @@ namespace FluentAssertions.Analyzers.Tests
         {
             var source = GenerateCode.GenericArrayCodeBlockAssertion(sourceAssertion);
 
-            DiagnosticVerifier.VerifyCSharpDiagnosticUsingAllAnalyzers(source, new DiagnosticResult
+            DiagnosticVerifier.VerifyCSharpDiagnosticUsingAllAnalyzers(source, new LegacyDiagnosticResult
             {
                 Id = FluentAssertionsAnalyzer.DiagnosticId,
                 Message = metadata.Message,

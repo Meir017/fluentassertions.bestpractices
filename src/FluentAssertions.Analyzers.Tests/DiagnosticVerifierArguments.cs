@@ -6,7 +6,7 @@ namespace FluentAssertions.Analyzers.Tests;
 
 public class DiagnosticVerifierArguments : CsProjectArguments
 {
-    public List<DiagnosticResult> ExpectedDiagnostics { get; } = new();
+    public List<LegacyDiagnosticResult> ExpectedDiagnostics { get; } = new();
 
     public List<DiagnosticAnalyzer> DiagnosticAnalyzers { get; } = new();
 
@@ -25,7 +25,7 @@ public class DiagnosticVerifierArguments : CsProjectArguments
         return this;
     }
 
-    public DiagnosticVerifierArguments WithExpectedDiagnostics(params DiagnosticResult[] expectedDiagnostics)
+    public DiagnosticVerifierArguments WithExpectedDiagnostics(params LegacyDiagnosticResult[] expectedDiagnostics)
     {
         ExpectedDiagnostics.AddRange(expectedDiagnostics);
         return this;

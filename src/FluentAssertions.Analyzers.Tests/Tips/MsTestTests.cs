@@ -1,13 +1,47 @@
 using FluentAssertions.Analyzers.TestUtils;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.Diagnostics;
+using Microsoft.CodeAnalysis.Testing;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace FluentAssertions.Analyzers.Tests.Tips
 {
     [TestClass]
     public class MsTestTests
     {
+        private class AllAnalyzersTest : AnalyzerTest<DefaultVerifier>
+        {
+            protected override string DefaultFileExt => "cs";
+            public override string Language => LanguageNames.CSharp;
+            private readonly AnalyzerOptions analyzerOptions;
+            public AllAnalyzersTest(IDictionary<string, string> analyzerConfigOptions = null)
+            {
+                analyzerOptions = analyzerConfigOptions != null ? new AnalyzerOptions(ImmutableArray<AdditionalText>.Empty, new TestAnalyzerConfigOptionsProvider(analyzerConfigOptions)) : null;
+            }
+
+            protected override CompilationOptions CreateCompilationOptions() => new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary, allowUnsafe: true);
+            protected override ParseOptions CreateParseOptions() => new CSharpParseOptions(LanguageVersion.Latest, DocumentationMode.Diagnose);
+            protected override IEnumerable<DiagnosticAnalyzer> GetDiagnosticAnalyzers() => CodeAnalyzersUtils.GetAllAnalyzers();
+
+            protected override AnalyzerOptions GetAnalyzerOptions(Project project) => analyzerOptions ?? project.AnalyzerOptions;
+        }
+
+        private class MsTestAnalyzerTest : Microsoft.CodeAnalysis.CSharp.Testing.CSharpAnalyzerTest<AssertAnalyzer, DefaultVerifier>
+        {
+            private readonly AnalyzerOptions analyzerOptions;
+            public MsTestAnalyzerTest(IDictionary<string, string> values = null)
+            {
+                analyzerOptions = values != null ? new AnalyzerOptions(ImmutableArray<AdditionalText>.Empty, new TestAnalyzerConfigOptionsProvider(values)) : null;
+            }
+
+            protected override AnalyzerOptions GetAnalyzerOptions(Project project) => analyzerOptions;
+        }
+
         [TestMethod]
         [Implemented]
         public void SupportExcludingMethods()
@@ -866,7 +900,7 @@ namespace FluentAssertions.Analyzers.Tests.Tips
                 .WithAllAnalyzers()
                 .WithSources(source)
                 .WithPackageReferences(PackageReference.FluentAssertions_6_12_0, PackageReference.MSTestTestFramework_3_1_1)
-                .WithExpectedDiagnostics(new DiagnosticResult
+                .WithExpectedDiagnostics(new LegacyDiagnosticResult
                 {
                     Id = AssertAnalyzer.MSTestsRule.Id,
                     Message = AssertAnalyzer.Message,

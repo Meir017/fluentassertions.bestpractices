@@ -283,7 +283,7 @@ namespace FluentAssertions.Analyzers.Tests
         {
             var source = GenerateCode.ExceptionAssertion(sourceAssertion);
 
-            DiagnosticVerifier.VerifyCSharpDiagnosticUsingAllAnalyzers(source, new DiagnosticResult
+            DiagnosticVerifier.VerifyCSharpDiagnosticUsingAllAnalyzers(source, new LegacyDiagnosticResult
             {
                 Id = FluentAssertionsAnalyzer.DiagnosticId,
                 Message = metadata.Message,
