@@ -268,10 +268,6 @@ namespace FluentAssertions.Analyzers.Tests
 
         #endregion
 
-        #region Set up compilation and documents
-
-        #endregion
-
         #region Verifier wrappers
 
         /// <summary>

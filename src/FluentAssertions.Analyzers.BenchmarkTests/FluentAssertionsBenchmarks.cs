@@ -48,7 +48,15 @@ namespace FluentAssertions.Analyzers.BenchmarkTests
 
         private async Task<CompilationWithAnalyzers> CreateCompilationFromAsync(params string[] sources)
         {
-            var project = CsProjectGenerator.CreateProject(sources);
+            var arguments = new CsProjectArguments
+            {
+                Language = LanguageNames.CSharp,
+                Sources = sources,
+                TargetFramework = TargetFramework.Net8_0,
+                PackageReferences = new[] { PackageReference.FluentAssertions_6_12_0, PackageReference.MSTestTestFramework_3_1_1 }
+            };
+            var project = CsProjectGenerator.CreateProject(arguments);
+
             var compilation = await project.GetCompilationAsync();
 
             if (compilation is null)
